@@ -22,6 +22,7 @@ export default function Workspace({
   layoutHeights,
   minW,
   minH,
+  onBreakpointChange,
 }) {
   let layouts;
 
@@ -31,7 +32,7 @@ export default function Workspace({
     if (Array.isArray(layout)) {
       // Add minimum width & minimum height if it isn't defined.
       if (!layout[0]?.minW || !layout[0]?.minH) {
-        const newCurrentLayout = layout.map(l => {
+        const newCurrentLayout = layout.map((l) => {
           l.minW = layout.minW;
           l.minH = layout.minH;
           return l;
@@ -39,15 +40,29 @@ export default function Workspace({
         layout = newCurrentLayout;
       }
 
-      layouts = generateLayouts(layoutWidths, layoutHeights, totalGridUnits, minW, minH);
+      layouts = generateLayouts(
+        layoutWidths,
+        layoutHeights,
+        totalGridUnits,
+        minW,
+        minH,
+      );
       layouts = {
-        ...layouts, lg: layout, md: layout,
+        ...layouts,
+        lg: layout,
+        md: layout,
       };
     } else {
       layouts = { ...layout };
     }
   } else {
-    layouts = generateLayouts(layoutWidths, layoutHeights, totalGridUnits, minW, minH);
+    layouts = generateLayouts(
+      layoutWidths,
+      layoutHeights,
+      totalGridUnits,
+      minW,
+      minH,
+    );
   }
 
   const children = useKeyWithChildren(_children);
@@ -75,6 +90,7 @@ export default function Workspace({
         breakpoints={breakpoints}
         cols={columns}
         onLayoutChange={onLayoutChange}
+        onBreakpointChange={onBreakpointChange}
       >
         {children}
       </ResponsiveGridLayout>
@@ -130,6 +146,7 @@ Workspace.propTypes = {
   classes: PropTypes.object,
   resizeHandle: PropTypes.instanceOf(React.Component),
   onLayoutChange: PropTypes.func,
+  onBreakpointChange: PropTypes.func,
   layout: PropTypes.array,
   layoutWidths: PropTypes.array,
   layoutHeights: PropTypes.oneOfType([

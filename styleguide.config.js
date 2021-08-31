@@ -18,7 +18,7 @@ module.exports = {
   exampleMode: 'expand',
   usageMode: 'expand',
   getComponentPathLine(componentPath) {
-    const componentName = componentPath.match(/(\w+)\/index.js/)[1];
+    const componentName = path.basename(componentPath, '.js');
     return `import { ${componentName} } from '${name}';`;
   },
   webpackConfig: {
