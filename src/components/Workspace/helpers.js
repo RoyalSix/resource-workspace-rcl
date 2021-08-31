@@ -52,7 +52,6 @@ export function getHeight(layoutHeights, ridx, cidx) {
     return 1;
   }
 }
-
 export function generateLayouts(layoutWidths, layoutHeights, maxGridUnits, minW, minH) {
   const layouts = [];
   const smLayouts = [];

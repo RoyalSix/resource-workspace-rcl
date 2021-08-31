@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Responsive, WidthProvider } from 'react-grid-layout';
+import { useWindowSize } from '../../hooks';
 import { Container } from './styled';
-import { useKeyWithChildren, generateLayouts } from './helpers';
+import {
+  useKeyWithChildren,
+  generateLayouts,
+} from './helpers';
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export default function Workspace({
@@ -22,6 +26,9 @@ export default function Workspace({
   layoutHeights,
   minW,
   minH,
+  autoResize,
+  rows,
+  correctHeight,
 }) {
   let layouts;
 
@@ -31,7 +38,7 @@ export default function Workspace({
     if (Array.isArray(layout)) {
       // Add minimum width & minimum height if it isn't defined.
       if (!layout[0]?.minW || !layout[0]?.minH) {
-        const newCurrentLayout = layout.map(l => {
+        const newCurrentLayout = layout.map((l) => {
           l.minW = layout.minW;
           l.minH = layout.minH;
           return l;
@@ -39,16 +46,39 @@ export default function Workspace({
         layout = newCurrentLayout;
       }
 
-      layouts = generateLayouts(layoutWidths, layoutHeights, totalGridUnits, minW, minH);
+      layouts = generateLayouts(
+        layoutWidths,
+        layoutHeights,
+        totalGridUnits,
+        minW,
+        minH,
+      );
       layouts = {
-        ...layouts, lg: layout, md: layout,
+        ...layouts,
+        lg: layout,
+        md: layout,
       };
     } else {
       layouts = { ...layout };
     }
   } else {
-    layouts = generateLayouts(layoutWidths, layoutHeights, totalGridUnits, minW, minH);
+    layouts = generateLayouts(
+      layoutWidths,
+      layoutHeights,
+      totalGridUnits,
+      minW,
+      minH,
+    );
   }
+
+  const [, height] = useWindowSize();
+  const [_rowHeight, setRowHeight] = useState(rowHeight);
+
+  useEffect(() => {
+    if (autoResize) {
+      setRowHeight((height - correctHeight) / rows - gridMargin[1] - 2);
+    }
+  }, [autoResize, height, rows, correctHeight, gridMargin]);
 
   const children = useKeyWithChildren(_children);
   const columns = _columns || {
@@ -59,7 +89,6 @@ export default function Workspace({
     xxs: minW || 2,
   };
   const dragHandleClass = classes.dragIndicator;
-
   return (
     <Container
       style={style}
@@ -68,7 +97,7 @@ export default function Workspace({
     >
       <ResponsiveGridLayout
         resizeHandle={resizeHandle || ''}
-        rowHeight={rowHeight}
+        rowHeight={_rowHeight}
         draggableHandle={`.${dragHandleClass}` || ''}
         margin={gridMargin}
         layouts={layouts}
@@ -92,7 +121,10 @@ Workspace.defaultProps = {
     xs: 480,
     xxs: 0,
   },
+  autoResize: false,
   rowHeight: 100,
+  rows: 5,
+  correctHeight: 0,
   children: [],
   layoutWidths: [[1]],
   layoutHeights: [[1]],
@@ -126,6 +158,7 @@ Workspace.propTypes = {
     xxs: PropTypes.number,
   }),
   rowHeight: PropTypes.number,
+  rows: PropTypes.number,
   dragBackgroundColor: PropTypes.string,
   classes: PropTypes.object,
   resizeHandle: PropTypes.instanceOf(React.Component),
@@ -139,4 +172,6 @@ Workspace.propTypes = {
   ]),
   minW: PropTypes.number,
   minH: PropTypes.number,
+  autoResize: PropTypes.bool,
+  correctHeight: PropTypes.number,
 };
